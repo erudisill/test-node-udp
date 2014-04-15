@@ -1,0 +1,16 @@
+{
+  "name": "testudp",
+  "version": "0.0.1",
+  "description": "Test node.js for UDP support.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "dependencies" : {
+  	"mongodb" : ">=1.4.0",
+  	"packet"  : "0.0.6"
+  },
+  "author": "Eric Rudisill",
+  "license": "ISC"
+}
