@@ -2,14 +2,16 @@ var config = require("./config");
 var dgram = require("dgram");
 var parserExec = require("packet").createParser();
 var mongo = require('mongodb').MongoClient;
+var fibrous = require('fibrous');
 
 
 // MONGO SETUP
-
-mongo.connect(config.mongo.url, function(err, db) {
+var db = null;
+mongo.connect(config.mongo.url, function(err, _db) {
 	if (err)
 		throw err;
 	console.log('connected to bitstorm db');
+	db = _db;
 });
 
 
@@ -36,16 +38,10 @@ server.on("error", function (err) {
   server.close();
 });
 
+
 server.on("message", function (msg, rinfo) {
-	var parser = parserExec.createParser();
-	parser.extract("__header", function (record) {
-		console.log(this);
-		console.log(record);
-		this.extract("proto_A", function (record) {
-			console.log(record);
-		});
-	});
-	parser.parse(msg);
+	console.log(handleMessage);
+	handleMessage.sync(msg, rinfo);
 });
 
 server.on("listening", function () {
@@ -56,3 +52,27 @@ server.on("listening", function () {
 
 
 server.bind(1973);
+
+// DOES NOT WORK - Throws fibrous error "Fibrous expects callback"
+/*
+var handleMessage = fibrous(function(msg, rinfo) {
+	var parser = parserExec.createParser();
+	parser.extract("__header", function (record) {
+		db.collection("accounts", function (err, c) {
+			c.find({ account_id: record.accountId })
+			.toArray( function (err, items) {
+				console.log("Ping from account " + items[0].name);
+				parser.extract(items[0].projects[0].formats[0].pattern, function (record) {
+					console.log(record);
+				});
+			});
+		});
+	});
+	parser.parse(msg);
+});
+*/
+
+var handleMessage = fibrous(function(msg, rinfo) {
+	console.log("fibrous: " + msg);
+	return "fibrous: " + msg;
+});
